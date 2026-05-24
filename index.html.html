@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>HSR Green Line – QMS | TrackWay</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Inter:wght@400;500;600;700&display=swap');
+:root{
+  --bg:#F2F5F9;--surface:#fff;--s2:#F7F9FC;--border:#E2E8F0;
+  --text:#1A2332;--muted:#64748B;--accent:#C87D0E;--acc2:#FFF3DC;
+  --red:#D63A2F;--redbg:#FEF2F1;--green:#1A8A4A;--greenbg:#EDFAF3;
+  --amber:#C97D10;--amberbg:#FFF8ED;--blue:#1D6FA4;--bluebg:#EDF5FC;
+  --purple:#6425A0;--purplebg:#F5EDFF;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.06);
+  --sh2:0 4px 24px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;min-height:100vh}
+
+/* HEADER */
+.hdr{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.hdr-in{display:flex;align-items:center;justify-content:space-between;max-width:1500px;margin:0 auto;height:62px}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.logo{background:linear-gradient(135deg,#C87D0E,#E8A020);color:#fff;font-weight:900;font-size:11px;padding:5px 11px;border-radius:6px;letter-spacing:1.5px;box-shadow:0 2px 8px rgba(200,125,14,.35)}
+.hdr-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;letter-spacing:.5px}
+.hdr-sub{color:var(--muted);font-size:9px;letter-spacing:2px;margin-top:1px;text-transform:uppercase}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.tkw-logo{display:flex;align-items:center;background:#fff;border:1px solid var(--border);border-radius:8px;padding:5px 12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.hdr-dev{font-size:11px;color:var(--muted);background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 14px;white-space:nowrap}
+.hdr-dev strong{color:var(--accent);font-weight:700}
+.hdr-chip{background:var(--s2);border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;color:var(--muted)}
+.btn-print{background:#fff;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s}
+.btn-print:hover{background:var(--s2);color:var(--text)}
+
+/* NAV */
+.nav{background:#fff;border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:62px;z-index:199}
+.nav-in{display:flex;max-width:1500px;margin:0 auto;overflow-x:auto;gap:2px}
+.nb{background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);padding:14px 20px;cursor:pointer;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;display:flex;align-items:center;gap:7px;white-space:nowrap;transition:all .2s}
+.nb:hover{background:var(--s2);color:var(--text);border-radius:6px 6px 0 0}
+.nb.active{font-weight:700}
+
+/* CONTENT */
+.content{max-width:1500px;margin:0 auto;padding:26px 24px}
+
+/* SEC HEADER */
+.sec-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;gap:14px;flex-wrap:wrap}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800}
+.sec-sub{color:var(--muted);font-size:11px;margin-top:2px}
+.sec-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+
+/* SEARCH */
+.search{background:#fff;border:1px solid var(--border);border-radius:9px;color:var(--text);padding:9px 14px 9px 36px;font-size:13px;width:230px;outline:none;font-family:'Inter',sans-serif;transition:border-color .2s;box-shadow:var(--sh);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+.search:focus{border-color:var(--accent)}
+.search::placeholder{color:var(--muted)}
+
+/* FILTER PILLS */
+.filters{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.fp{background:#fff;border:1px solid var(--border);border-radius:20px;padding:5px 13px;font-size:11px;font-weight:600;cursor:pointer;color:var(--muted);transition:all .15s;font-family:'Inter',sans-serif}
+.fp:hover{border-color:var(--accent);color:var(--accent)}
+.fp.active{border-color:var(--accent);background:var(--acc2);color:var(--accent)}
+
+/* BUTTONS */
+.btn-add{background:linear-gradient(135deg,#C87D0E,#E8A020);border:none;border-radius:9px;color:#fff;padding:9px 18px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;letter-spacing:.3px;box-shadow:0 2px 10px rgba(200,125,14,.35);transition:opacity .15s}
+.btn-add:hover{opacity:.88}
+.btn-export{background:#fff;border:1px solid var(--border);border-radius:9px;color:var(--green);padding:9px 16px;cursor:pointer;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;box-shadow:var(--sh);transition:all .15s}
+.btn-export:hover{background:var(--greenbg);border-color:var(--green)}
+.btn-edit{background:var(--bluebg);border:1px solid #C5D8EE;border-radius:6px;color:var(--blue);padding:4px 11px;cursor:pointer;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;transition:background .15s}
+.btn-edit:hover{background:#D6E8F7}
+.btn-del{background:var(--redbg);border:1px solid #F5C5C1;border-radius:6px;color:var(--red);padding:4px 11px;cursor:pointer;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;transition:background .15s;margin-left:4px}
+.btn-del:hover{background:#FBDCDA}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:16px;margin-bottom:24px}
+.kpi{background:#fff;border-radius:14px;padding:20px 22px;border:1px solid var(--border);border-left:4px solid var(--c,#ccc);box-shadow:var(--sh);transition:transform .15s,box-shadow .15s;cursor:default}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.kpi-lbl{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:46px;font-weight:900;line-height:1;color:var(--c)}
+.kpi-sub{color:var(--muted);font-size:11px;margin-top:7px}
+.kpi-bar{height:4px;border-radius:2px;background:var(--border);margin-top:12px;overflow:hidden}
+.kpi-bar-fill{height:100%;border-radius:2px;background:var(--c);transition:width .6s ease}
+
+/* ALERT */
+.alert{background:#FFFAEC;border:1px solid #F5C96B;border-left:4px solid var(--accent);border-radius:12px;padding:16px 20px;margin-bottom:22px}
+.alert-title{color:var(--accent);font-weight:700;font-size:13px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.alert-body{color:#4A3800;font-size:12px;line-height:1.7}
+
+/* CHARTS GRID */
+.charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;margin-bottom:24px}
+.chart-card{background:#fff;border-radius:14px;padding:20px;border:1px solid var(--border);box-shadow:var(--sh)}
+.chart-title{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:14px}
+.chart-wrap{position:relative;height:180px}
+
+/* SUMMARY */
+.sum-block{background:#fff;border-radius:14px;padding:22px;border:1px solid var(--border);box-shadow:var(--sh)}
+.sum-lbl{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.sum-row{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.sum-row:last-child{border-bottom:none}
+.reg-pill{font-weight:800;font-size:12px;border-radius:6px;padding:5px 13px;min-width:56px;text-align:center;letter-spacing:.5px}
+.sum-code{color:var(--muted);font-size:11px;flex:1;min-width:200px}
+.bdg-row{display:flex;gap:6px;flex-wrap:wrap}
+.prog-bar{flex:1;min-width:100px;max-width:160px}
+.prog-track{height:6px;border-radius:3px;background:var(--border);overflow:hidden}
+.prog-fill{height:100%;border-radius:3px;transition:width .6s ease}
+
+/* BADGE */
+.bdg{display:inline-block;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:700;letter-spacing:.3px;white-space:nowrap}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;border-radius:14px;border:1px solid var(--border);box-shadow:var(--sh);background:#fff}
+table{width:100%;border-collapse:collapse}
+thead tr{background:var(--s2)}
+th{padding:12px 14px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;white-space:nowrap;border-bottom:2px solid var(--border);color:var(--muted);cursor:pointer;user-select:none;transition:background .15s}
+th:hover{background:#EBF0F7}
+th .sort-icon{margin-left:4px;opacity:.4}
+th.sorted .sort-icon{opacity:1}
+td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:nth-child(even) td{background:#FAFBFD}
+tbody tr:hover td{background:#F0F6FF;transition:background .1s}
+.tkw-row td{background:#FFFAF0!important;border-left:3px solid var(--accent)}
+
+/* MODAL */
+.ov{position:fixed;inset:0;background:rgba(15,25,40,.5);z-index:999;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.mbox{background:#fff;border-radius:18px;width:min(700px,100%);max-height:90vh;overflow-y:auto;padding:32px;position:relative;box-shadow:0 12px 50px rgba(0,0,0,.2)}
+.m-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:var(--text)}
+.m-close{position:absolute;top:20px;right:20px;background:var(--s2);border:1px solid var(--border);color:var(--muted);font-size:16px;cursor:pointer;width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .15s}
+.m-close:hover{background:var(--border)}
+.fg{display:grid;gap:14px;margin-top:22px}
+.fl{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;display:block;margin-bottom:5px}
+.fi,.fs,.ft{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;outline:none;transition:all .2s}
+.fi:focus,.fs:focus,.ft:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px rgba(200,125,14,.12)}
+.ft{resize:vertical;min-height:78px}
+.m-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--border)}
+.btn-cancel{background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--muted);padding:10px 22px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px}
+.btn-save{background:linear-gradient(135deg,#C87D0E,#E8A020);border:none;border-radius:9px;color:#fff;font-weight:700;padding:10px 26px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;box-shadow:0 2px 10px rgba(200,125,14,.3)}
+
+/* CONFIRM MODAL */
+.confirm-box{background:#fff;border-radius:14px;width:min(380px,100%);padding:28px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.confirm-title{font-weight:700;font-size:16px;margin-bottom:8px;color:var(--red)}
+.confirm-body{color:var(--muted);font-size:13px;margin-bottom:22px;line-height:1.6}
+.confirm-actions{display:flex;gap:10px;justify-content:flex-end}
+.btn-confirm-del{background:var(--red);border:none;border-radius:8px;color:#fff;font-weight:700;padding:9px 20px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px}
+.btn-confirm-cancel{background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);padding:9px 18px;cursor:pointer;font-family:'Inter',sans-serif;font-size:13px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:#1A2332;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s ease;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* PRINT */
+@media print{
+  .hdr,.nav,.sec-actions,.btn-edit,.btn-del,.btn-add,.btn-export,.btn-print,.filters,.charts-grid,.toast{display:none!important}
+  .content{padding:0}
+  .tbl-wrap{box-shadow:none;border:1px solid #ccc}
+  body{background:#fff}
+}
+
+/* MOBILE */
+@media(max-width:640px){
+  .hdr-right{display:none}
+  .content{padding:14px}
+  .search{width:100%}
+  .kpi-val{font-size:36px}
+  .charts-grid{grid-template-columns:1fr}
+}
+
+/* ── Monthly Report ─────────────────────────────────────────── */
+.btn-report{background:linear-gradient(135deg,#1D6FA4,#2980B9);border:none;border-radius:8px;
+  color:#fff;padding:6px 14px;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;
+  cursor:pointer;box-shadow:0 2px 8px rgba(29,111,164,.3);transition:opacity .15s;letter-spacing:.3px}
+.btn-report:hover{opacity:.88}
+
+.rpt-overlay{position:fixed;inset:0;background:rgba(10,20,35,.6);z-index:2000;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:24px 16px;overflow-y:auto;backdrop-filter:blur(4px)}
+.rpt-modal{background:#fff;border-radius:16px;width:min(860px,100%);
+  padding:36px;position:relative;box-shadow:0 16px 60px rgba(0,0,0,.25);
+  font-family:'Inter',sans-serif}
+.rpt-close{position:absolute;top:18px;right:18px;background:var(--s2);
+  border:1px solid var(--border);color:var(--muted);font-size:16px;
+  cursor:pointer;width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center}
+.rpt-close:hover{background:var(--border)}
+.rpt-header{display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:24px;gap:16px;flex-wrap:wrap}
+.rpt-logo-area{display:flex;align-items:center;gap:12px}
+.rpt-project{font-size:11px;color:var(--muted);line-height:1.6}
+.rpt-title-area h2{font-family:'Barlow Condensed',sans-serif;font-size:22px;
+  font-weight:800;color:var(--text)}
+.rpt-title-area p{font-size:11px;color:var(--muted);margin-top:2px}
+.rpt-period{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+  padding:14px 16px;background:var(--s2);border-radius:10px;
+  border:1px solid var(--border);margin-bottom:22px}
+.rpt-period label{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase}
+.rpt-period select,.rpt-period input{background:#fff;border:1px solid var(--border);
+  border-radius:7px;padding:7px 11px;font-size:13px;font-family:'Inter',sans-serif;
+  color:var(--text);outline:none}
+.rpt-period select:focus,.rpt-period input:focus{border-color:var(--blue)}
+.rpt-section{margin-bottom:22px}
+.rpt-section-title{font-size:11px;font-weight:800;letter-spacing:1px;
+  text-transform:uppercase;color:#fff;padding:7px 14px;border-radius:6px;
+  margin-bottom:12px}
+.rpt-kpi-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:14px}
+.rpt-kpi{background:var(--s2);border-radius:10px;padding:14px 16px;
+  border-left:3px solid var(--c,#ccc);text-align:center}
+.rpt-kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:36px;
+  font-weight:900;color:var(--c);line-height:1}
+.rpt-kpi-lbl{font-size:10px;font-weight:700;color:var(--muted);
+  letter-spacing:.5px;text-transform:uppercase;margin-top:5px}
+.rpt-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.rpt-table th{background:var(--s2);padding:8px 10px;text-align:left;
+  font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);border-bottom:2px solid var(--border)}
+.rpt-table td{padding:8px 10px;border-bottom:1px solid var(--border);
+  vertical-align:top;color:var(--text)}
+.rpt-table tr:last-child td{border-bottom:none}
+.rpt-table tr:nth-child(even) td{background:#FAFBFD}
+.rpt-actions{display:flex;gap:10px;justify-content:flex-end;
+  margin-top:24px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap}
+.rpt-btn-pdf{background:linear-gradient(135deg,#1D4E9C,#2B6AC8);border:none;
+  border-radius:9px;color:#fff;font-weight:700;padding:10px 22px;
+  cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;
+  box-shadow:0 2px 10px rgba(29,78,156,.3)}
+.rpt-btn-excel{background:linear-gradient(135deg,#1A6B32,#27AE60);border:none;
+  border-radius:9px;color:#fff;font-weight:700;padding:10px 22px;
+  cursor:pointer;font-family:'Inter',sans-serif;font-size:13px;
+  box-shadow:0 2px 10px rgba(26,107,50,.3)}
+.rpt-btn-cancel{background:var(--s2);border:1px solid var(--border);
+  border-radius:9px;color:var(--muted);padding:10px 18px;
+  cursor:pointer;font-family:'Inter',sans-serif;font-size:13px}
+
+@media print{
+  .rpt-overlay,.rpt-modal,.btn-report{display:none!important}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-in">
+    <div class="hdr-left"><div class="tkw-logo"><img src="data:image/png;base64,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" alt="TrackWay" style="height:44px;width:auto;display:block;margin-right:14px"/></div>
+      <span class="logo">HSR</span>
+      <div>
+        <div class="hdr-title">Quality Management System</div>
+        <div class="hdr-sub">Green Line · OCS · TrackWay · Contract 108/Metro</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span class="hdr-dev">Developed by <strong>Abdelazem Ahmed</strong> &nbsp;·&nbsp; Quality Manager</span>
+      <button class="btn-report" onclick="openMonthlyReport()">📊 Monthly Report</button>
+      <button class="btn-print" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+</div>
+
+<div class="nav"><div class="nav-in" id="nav-in"></div></div>
+<div class="content" id="app"></div>
+
+<!-- MODAL -->
+<div class="ov" id="modal" style="display:none" onclick="if(event.target===this)closeModal()">
+  <div class="mbox">
+    <button class="m-close" onclick="closeModal()">✕</button>
+    <div class="m-title" id="m-title"></div>
+    <div class="fg" id="m-form"></div>
+    <div class="m-actions">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" onclick="saveModal()">💾 Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE -->
+<div class="ov" id="confirm" style="display:none">
+  <div class="confirm-box">
+    <div class="confirm-title">🗑 Delete Record?</div>
+    <div class="confirm-body" id="confirm-body">This action cannot be undone.</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-cancel" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-del" onclick="execDelete()">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════ DATA ═══════════════════════════════════
+const INIT = {
+  rfi:[
+    {id:1,code:"HSR-TKW-RFI-CJV-GL-000001",rev:"A",date:"06-May-26",issue:"Issue 1",description:"Cantilever tube front end pressed down due to excessive force",location:"138-2,138-6,138-10,138-14,138-24,138-28,138-32,138-36,139-4,139-8,139-20,139-28,139-32,140-4,140-8,140-12,140-16,140-20,140-28,140-32,138-4,138-8,138-12,138-26,138-30,139-2,139-6,139-18,139-22,139-26,139-30,139-34,140-6,140-10,140-14,140-18,140-22,140-26,140-30 + OG1-168 to OG1-187 (loop track)",poles:48,risk:"HIGH",responsible:"Material Party",action:"Inspect & replace deformed tubes; risk of collapse & pantograph damage",status:"Open",response:"",remarks:""},
+    {id:2,code:"HSR-TKW-RFI-CJV-GL-000001",rev:"A",date:"06-May-26",issue:"Issue 2",description:"Exposed tube part too short; stagger adjustment not possible",location:"138-2,138-6,138-10,138-14,138-24,138-28,138-32,138-36,139-4,139-8,139-20,139-28,139-32,140-4,140-8,140-12,140-16,140-20,140-28,140-32",poles:21,risk:"HIGH",responsible:"Material Party / Designer",action:"Replace tubes with correct length to allow proper stagger adjustment",status:"Open",response:"",remarks:""},
+    {id:3,code:"HSR-TKW-RFI-CJV-GL-000001",rev:"A",date:"06-May-26",issue:"Issue 3",description:"Wire clamp bolts installed in reversed direction",location:"138-4,138-8,138-12,138-26,138-30,139-2,139-6,139-18,139-22,139-26,139-30,139-34,140-6,140-10,140-14,140-18,140-22,140-26,140-30",poles:19,risk:"MEDIUM",responsible:"Material Party",action:"Correct bolt direction during final adjustment stage",status:"Open",response:"",remarks:""},
+    {id:4,code:"HSR-TKW-RFI-CJV-GL-000001",rev:"A",date:"06-May-26",issue:"Issue 4",description:"Installation direction deviates from approved drawing",location:"138-24",poles:1,risk:"MEDIUM",responsible:"Installer",action:"Confirm correct orientation per approved drawing and rectify",status:"Open",response:"",remarks:""},
+    {id:5,code:"HSR-TKW-RFI-CJV-GL-000001",rev:"A",date:"06-May-26",issue:"Issue 5",description:"Dropper too long – contacts cantilever",location:"OG3-08",poles:1,risk:"HIGH",responsible:"Designer Party",action:"Replace with shorter dropper; Siemens Engineer already informed",status:"Open",response:"",remarks:""}
+  ],
+  ncr:[
+    {id:1,code:"NCS-GEN-RELOCS-CJV-TRK-00001",cat:"14.2",date:"06-Apr-26",zone:"Main Line / Sector C",description:"Unauthorised commencement of site activities (126 KP–140 KP) prior to obtaining ER approval on Site Notification/Approval (ITP)",kp:"KP 126 – KP 140",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit SNA documents for main line activities for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of SNA/ITP. Site team briefed on approval procedures.",closing:"15-May-26",status:"Open",reviewer:"",closedBy:"",remarks:""},
+    {id:2,code:"NCS-GEN-RELOCS-CJV-TRK-00002",cat:"14.2",date:"06-Apr-26",zone:"Main Line / Sector D",description:"Unauthorised commencement of site activities (141 KP–143 KP) prior to obtaining ER approval on Site Notification/Approval (ITP)",kp:"KP 141 – KP 143",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit SNA documents for main line activities for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of SNA/ITP. Site team briefed on approval procedures.",closing:"15-May-26",status:"Open",reviewer:"",closedBy:"",remarks:""},
+    {id:3,code:"NCS-GEN-RELOCS-CJV-TRK-00003",cat:"14.2",date:"06-Apr-26",zone:"Depot",description:"Unauthorised commencement of site activities for DEPOT tracks prior to obtaining ER approval on Site Notification/Approval (ITP)",kp:"Depot Tracks",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit SNA documents for depot activities for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of SNA/ITP. Site team briefed on approval procedures.",closing:"15-May-26",status:"Open",reviewer:"",closedBy:"",remarks:""},
+    {id:4,code:"NCS-GEN-RELOCS-CJV-TRK-00004",cat:"14.2",date:"06-Apr-26",zone:"Main Line / Sector C",description:"Unauthorized installation & tensioning of MESSENGER, CONTACT, RETURN CONDUCTOR, AUXILIARY FEEDER and NEGATIVE FEEDER wiring (KP 126–140) on cantilevers without ER inspection/approval",kp:"KP 126 – KP 140",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit WIR documents for cantilever activities for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of WIR of previous step. Site team briefed on approval procedures.",closing:"15-Jun-26",status:"Open",reviewer:"",closedBy:"",remarks:""},
+    {id:5,code:"NCS-GEN-RELOCS-CJV-TRK-00005",cat:"14.2",date:"06-Apr-26",zone:"Main Line / Sector D",description:"Unauthorized installation & tensioning of MESSENGER, CONTACT, RETURN CONDUCTOR, AUXILIARY FEEDER and NEGATIVE FEEDER wiring (KP 141–143) on cantilevers without ER inspection/approval",kp:"KP 141 – KP 143",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit WIR documents for cantilever activities for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of WIR of previous step. Site team briefed on approval procedures.",closing:"15-Jun-26",status:"Open",reviewer:"",closedBy:"",remarks:""},
+    {id:6,code:"NCS-GEN-RELOCS-CJV-TRK-00006",cat:"14.2",date:"06-Apr-26",zone:"Depot",description:"Unauthorized installation & tensioning of MESSENGER, CONTACT and RETURN CONDUCTOR wiring for DEPOT tracks on cantilevers without ER inspection/approval",kp:"Depot Tracks",rootCause:"Methods",responsible:"Supplier (TrackWay)",action:"Rework as required",correction:"Prepare & submit WIR documents for cantilever activities in depot for ER approval",corrective:"Control measure implemented: no site activities to commence without prior ER approval of WIR of previous step. Site team briefed on approval procedures.",closing:"15-Jun-26",status:"Open",reviewer:"",closedBy:"",remarks:""}
+  ],
+  sna:[
+    {id:1,code:"SNA-DP01-RELOCS-TKW-00003",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of OCS Support & Cantilever Installation",scope:"Brackets & Backstay & Pulling Weights | Cantilever Installation | Cross-span wires & Vertical suspensions",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""},
+    {id:2,code:"SNA-DP01-RELOCS-TKW-00004",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of OCS Wiring Installation",scope:"RC & NF & AF Wiring | CW & MW & Tension Devices | Stitch wire & Associated droppers",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""},
+    {id:3,code:"SNA-DP01-RELOCS-TKW-00005",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of Droppers and Mid-point",scope:"Droppers Installation | Mid-point arrangement installation",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""},
+    {id:4,code:"SNA-DP01-RELOCS-TKW-00006",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of Switching & Protection Equipment",scope:"Disconnector | Motor Drive | Surge Arrester",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""},
+    {id:5,code:"SNA-DP01-RELOCS-TKW-00007",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of Electrical Connections & Power Components",scope:"Jumpers and Electrical Connections | Auxiliary Transformers | Transverse Cable | Insulated 25kV Cables",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""},
+    {id:6,code:"SNA-DP01-RELOCS-TKW-00008",rev:"A",date:"20-Apr-26",location:"October Garden Depot",activity:"Installation of Earthing, Adjustment & Testing",scope:"Earthing and Bonding | Adjustment and Registration of OCS Components | Height and Stagger Measurement | Section Insulator Installation",itp:"HSR-SOA-TPR-RELOCS-GL-1400001",mat:"✔",prelim:"✔",drawings:"✔",method:"✔",permits:"✔",equip:"✔",itpCheck:"✔",erStatus:"Pending",remarks:"",comments:""}
+  ],
+  qvn:[
+    {id:1,code:"QVN-01",sor:"01",date:"20-Nov-25",originator:"Jose Plata",designation:"OCS Manager",contractor:"SOAC-CJV",location:"Main Line - TSS3 to OG Depot (KP 1+208.27)",subject:"Incorrect cantilever installed at KP 1+208.27",description:"During pole WIR inspection by SYSTRA and SOAC: 1- The installed cantilever is incorrect for this location.",refOther:true,relatedTKW:true,ncrStatus:"NCR Required - Open",contractorRef:"",closedBy:""}
+  ],
+  wir:[
+    {id:1,code:"WIR-DP01-RELOCS-TKW-0001",rev:"A",date:"27/04/2026",type:"Bracket",locFrom:"OG1-022 (0+608.010 km)",locTo:"OG1-041 (1+274.260 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-022, OG1-024, OG1-025, OG1-106, OG1-107, OG1-108, OG1-109, OG1-110, OG1-111, OG1-112, OG1-113, OG1-114, OG1-115, OG1-116, OG1-117, OG1-118, OG1-119, OG1-039, OG1-040, OG1-041",poleCount:20,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:2,code:"WIR-DP01-RELOCS-TKW-0002",rev:"A",date:"27/04/2026",type:"Bracket",locFrom:"OG1-009 (0+145.761 km)",locTo:"OG1-050 (1+570.262 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-009, OG1-010, OG1-011, OG1-012, OG1-013, OG1-014, OG1-015, OG1-016, OG1-017, OG1-018, OG1-019, OG1-020, OG1-021, OG1-023, OG1-026, OG1-027, OG1-028, OG1-029, OG1-030, OG1-031, OG1-032, OG1-033, OG1-034, OG1-035, OG1-036, OG1-037, OG1-038, OG1-105, OG3-001, OG1-043, OG1-044, OG1-045, OG1-046, OG1-047, OG1-048, OG1-049, OG1-050",poleCount:37,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:3,code:"WIR-DP01-RELOCS-TKW-0003",rev:"A",date:"27/04/2026",type:"Brackets",locFrom:"OG1-155 (1+749.649 km)",locTo:"OG1-176 (1+797.704 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-155, OG1-156, OG1-157, OG1-158, OG1-159, OG1-160, OG1-161, OG1-162, OG1-163, OG1-164, OG1-165, OG1-166, OG1-167, OG1-168, OG1-169, OG1-170, OG1-171, OG1-172, OG1-173, OG1-174, OG1-175, OG1-176",poleCount:22,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:4,code:"WIR-DP01-RELOCS-TKW-0004",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"OG1-138 (1+130.103 km)",locTo:"OG1-158 (1+839.652 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-142, OG1-143, OG1-144, OG1-145, OG1-146, OG1-147, OG1-148, OG1-149, OG1-150, OG1-151, OG1-152, OG1-153, OG1-154",poleCount:13,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:5,code:"WIR-DP01-RELOCS-TKW-0005",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"OG1-190 (1+548.898 km)",locTo:"OG1-171 (1+830.641 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-190, OG1-189, OG1-188, OG1-187, OG1-186, OG1-185, OG1-184, OG1-183, OG1-182, OG1-181, OG1-180, OG1-179, OG1-178, OG1-177",poleCount:14,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:6,code:"WIR-DP01-RELOCS-TKW-0006",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"OG1-105 (1+254.884 km)",locTo:"S6_SY1_fix_1 (0.227739 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-002, OG3-003, OG3-004, OG3-005, OG3-007, OG3-010, OG3-015, OG3-017, OG3-022, OG3-028, OG3-038, S6_SY1_fix_1",poleCount:12,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:7,code:"WIR-DP01-RELOCS-TKW-0007",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"S6_SY1_fix_2 (0.901189 km)",locTo:"OG3-070 (1+288.625 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"S6_SY1_fix_2, OG3-043, OG3-048, OG3-053, OG3-056, OG3-059, OG3-061, OG3-065, OG3-067, OG3-070",poleCount:10,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:8,code:"WIR-DP01-RELOCS-TKW-0008",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"OG3-010 (0+220.908 km)",locTo:"S5_SY1_fix_1 (0.123990 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-021, OG3-027, OG3-033, OG3-037, S5_SY1_fix_1",poleCount:5,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:9,code:"WIR-DP01-RELOCS-TKW-0009",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"S5_SY1_fix_2 (0.797440 km)",locTo:"OG3-062 (1+044.611 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"S5_SY1_fix_2, OG3-042, OG3-047, OG3-052, OG3-055, OG3-058, OG3-062",poleCount:7,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:10,code:"WIR-DP01-RELOCS-TKW-00010",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"OG3-011 (0+225.780 km)",locTo:"S3_SY1_fix_1 (0.144098 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-011, OG3-013, OG3-014, OG3-019, OG3-025, OG3-031, OG3-036, S3_SY1_fix_1",poleCount:8,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:11,code:"WIR-DP01-RELOCS-TKW-00011",rev:"A",date:"30/04/2026",type:"Brackets",locFrom:"S3_SY1_fix_2 (0.817548 km)",locTo:"OG3-073 (1+377.482 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"S3_SY1_fix_2, OG3-041, OG3-046, OG3-051, OG3-064, OG3-066, OG3-068, OG3-069, OG3-071, OG3-072, OG3-073",poleCount:11,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:12,code:"WIR-DP01-RELOCS-TKW-00012",rev:"A",date:"04/05/2026",type:"Brackets",locFrom:"S1_SY1_fix_2 (0.819923 km)",locTo:"OG3-069 (1+225.979 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-039, OG3-044, OG3-049, OG3-054, OG3-057, OG3-060",poleCount:6,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:13,code:"WIR-DP01-RELOCS-TKW-00013",rev:"A",date:"04/05/2026",type:"Brackets",locFrom:"OG1-120 (0+230.099 km)",locTo:"OG1-141 (1+275.104 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG1-121, OG1-122, OG1-123, OG1-124, OG1-125, OG1-126, OG1-127, OG1-128, OG1-129, OG1-130, OG1-131, OG1-132, OG1-133, OG1-134, OG1-135, OG1-136, OG1-137, OG1-138, OG1-139, OG1-140, OG1-141",poleCount:21,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:14,code:"WIR-DP01-RELOCS-TKW-00014",rev:"A",date:"04/05/2026",type:"Brackets",locFrom:"OG3-006 (0+131.447 km)",locTo:"S1_SY1_fix_1 (0.146473 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-023, OG3-029, OG3-034",poleCount:3,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:15,code:"WIR-DP01-RELOCS-TKW-00015",rev:"A",date:"04/05/2026",type:"Brackets",locFrom:"S2_SY1_fix_2 (0.859232 km)",locTo:"OG3-063 (1+154.610 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-040, OG3-045, OG3-050",poleCount:3,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""},
+    {id:16,code:"WIR-DP01-RELOCS-TKW-00016",rev:"A",date:"04/05/2026",type:"Brackets",locFrom:"OG3-005 (0+170.961 km)",locTo:"S2_SY1_fix_1 (0.185782 km)",desc:"Installation of brackets for Return Conductor and Cantilever",poles:"OG3-006, OG3-008, OG3-009, OG3-012, OG3-016, OG3-018, OG3-024, OG3-030, OG3-035",poleCount:9,checklist:"✓",plannedDate:"",inspDate:"",inspector:"",status:"PENDING",remarks:""}
+  ]
+};
+
+// ═══════════════════════ STATE ════════════════════════════════
+function loadData(){
+  try{
+    const s=localStorage.getItem('hsr_qms_v4');
+    if(s){
+      const saved=JSON.parse(s);
+      // Always refresh registers from INIT if saved version has 0 records
+      const merged=JSON.parse(JSON.stringify(INIT));
+      if(saved.rfi&&saved.rfi.length>0) merged.rfi=saved.rfi;
+      if(saved.ncr&&saved.ncr.length>0) merged.ncr=saved.ncr;
+      if(saved.sna&&saved.sna.length>0) merged.sna=saved.sna;
+      if(saved.qvn&&saved.qvn.length>0) merged.qvn=saved.qvn;
+      return merged;
+    }
+    return JSON.parse(JSON.stringify(INIT));
+  }
+  catch(e){return JSON.parse(JSON.stringify(INIT));}
+}
+function saveData(){localStorage.setItem('hsr_qms_v4',JSON.stringify(DATA));showToast('✅ Changes saved');}
+let DATA=loadData();
+let tab='dashboard',search='',filterStatus='All';
+let sortKey={},sortDir={};
+let editItem=null,editType=null,deleteItem=null,deleteType=null;
+let charts={};
+
+// ═══════════════════════ UTILS ════════════════════════════════
+const sc=s=>{if(!s)return'var(--muted)';const l=s.toLowerCase();if(l.includes('open')||l.includes('required'))return'var(--red)';if(l.includes('pending'))return'var(--amber)';if(l.includes('closed')||l.includes('approved'))return'var(--green)';return'var(--blue)';}
+const sbg=s=>{if(!s)return'#F0F3F7';const l=s.toLowerCase();if(l.includes('open')||l.includes('required'))return'var(--redbg)';if(l.includes('pending'))return'var(--amberbg)';if(l.includes('closed')||l.includes('approved'))return'var(--greenbg)';return'var(--bluebg)';}
+const rc=r=>r==='HIGH'?'var(--red)':r==='MEDIUM'?'var(--amber)':'var(--green)';
+const rbg=r=>r==='HIGH'?'var(--redbg)':r==='MEDIUM'?'var(--amberbg)':'var(--greenbg)';
+const bdg=(l,c,bg)=>`<span class="bdg" style="background:${bg||c+'18'};color:${c};border:1px solid ${c}30">${l}</span>`;
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+
+function filtered(arr){
+  let r=[...arr];
+  if(search){const q=search.toLowerCase();r=r.filter(x=>Object.values(x).some(v=>String(v).toLowerCase().includes(q)));}
+  if(filterStatus&&filterStatus!=='All'){
+    r=r.filter(x=>{
+      const s=(x.status||x.erStatus||x.ncrStatus||'').toLowerCase();
+      const f=filterStatus.toLowerCase();
+      return s.includes(f);
+    });
+  }
+  const k=sortKey[tab];
+  if(k){const d=sortDir[tab]||1;r.sort((a,b)=>{const av=String(a[k]||''),bv=String(b[k]||'');return av.localeCompare(bv,undefined,{numeric:true})*d;});}
+  return r;
+}
+
+// ═══════════════════════ NAV ══════════════════════════════════
+const TABS=[
+  {key:'dashboard',label:'Dashboard',icon:'📊',color:'var(--accent)'},
+  {key:'rfi',label:'RFI',icon:'📋',color:'var(--blue)'},
+  {key:'ncr',label:'NCR',icon:'⚠️',color:'var(--red)'},
+  {key:'sna',label:'SNA',icon:'🚦',color:'var(--green)'},
+  {key:'qvn',label:'QVN',icon:'🔔',color:'var(--purple)'},
+  {key:'wir',label:'WIR',icon:'🔍',color:'#0E7490'},
+];
+function renderNav(){
+  document.getElementById('nav-in').innerHTML=TABS.map(t=>`
+    <button class="nb ${tab===t.key?'active':''}"
+      style="${tab===t.key?`color:${t.color};border-bottom-color:${t.color}`:''}"
+      onclick="switchTab('${t.key}')">${t.icon} ${t.label}
+      ${t.key!=='dashboard'?`<span style="background:${tab===t.key?t.color+'22':'var(--border)'};color:${tab===t.key?t.color:'var(--muted)'};border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">${DATA[t.key].length}</span>`:''}
+    </button>`).join('');
+}
+function switchTab(k){tab=k;search='';filterStatus='All';renderNav();render();}
+
+// ═══════════════════════ MAIN RENDER ══════════════════════════
+function render(){
+  destroyCharts();
+  const el=document.getElementById('app');
+  if(tab==='dashboard'){el.innerHTML=dashHTML();initCharts();return;}
+  const t=TABS.find(x=>x.key===tab);
+  const statusOpts={rfi:['All','Open','Pending','Closed'],ncr:['All','Open','Closed'],sna:['All','Pending ER','Approved','Rejected'],qvn:['All','Open','Closed'],wir:['All','PENDING','APPROVED','AWC','REJECTED']};
+  el.innerHTML=`
+    <div class="sec-hdr">
+      <div>
+        <div class="sec-title" style="color:${t.color}">${t.icon} ${t.label} Register</div>
+        <div class="sec-sub">${DATA[tab].length} total records &nbsp;·&nbsp; auto-saved to browser</div>
+      </div>
+      <div class="sec-actions">
+        <input class="search" placeholder="Search…" value="${esc(search)}" oninput="search=this.value;renderTable()"/>
+        <button class="btn-export" onclick="exportXLSX()">⬇ Export Excel</button>
+        <button class="btn-add" onclick="openAdd()">＋ Add Record</button>
+      </div>
+    </div>
+    <div class="filters">${(statusOpts[tab]||[]).map(s=>`<button class="fp ${filterStatus===s?'active':''}" onclick="setFilter('${s}')">${s}</button>`).join('')}</div>
+    <div id="tbl-area"></div>`;
+  renderTable();
+}
+
+function setFilter(s){filterStatus=s;renderTable();}
+
+function renderTable(){
+  const el=document.getElementById('tbl-area');if(!el)return;
+  const rows=filtered(DATA[tab]);
+  if(tab==='rfi')el.innerHTML=rfiTbl(rows);
+  if(tab==='ncr')el.innerHTML=ncrTbl(rows);
+  if(tab==='sna')el.innerHTML=snaTbl(rows);
+  if(tab==='qvn')el.innerHTML=qvnTbl(rows);
+  if(tab==='wir')el.innerHTML=wirTbl(rows);
+  // re-highlight filter buttons
+  document.querySelectorAll('.fp').forEach(b=>{b.classList.toggle('active',b.textContent===filterStatus);});
+  document.querySelectorAll('[data-t]').forEach(function(b){
+    b.onclick=function(){var t=b.getAttribute('data-t'),i=parseInt(b.getAttribute('data-id'));
+      if(b.classList.contains('btn-edit'))openEdit(t,i);else openDel(t,i);};
+  });
+}
+
+// ═══════════════════════ SORT ═════════════════════════════════
+function sortBy(key){
+  if(sortKey[tab]===key)sortDir[tab]=(sortDir[tab]||1)*-1;
+  else{sortKey[tab]=key;sortDir[tab]=1;}
+  renderTable();
+}
+function thSort(key,label){
+  const active=sortKey[tab]===key;
+  const dir=active?(sortDir[tab]===1?'↑':'↓'):'↕';
+  return `<th onclick="sortBy('${key}')" class="${active?'sorted':''}">${label} <span class="sort-icon">${dir}</span></th>`;
+}
+
+// ═══════════════════════ TABLES ═══════════════════════════════
+const actions=(type,id)=>`<td><button class="btn-edit" onclick="openEdit('${type}',${id})">✏ Edit</button><button class="btn-del" onclick="openDel('${type}',${id})">🗑</button></td>`;
+
+function rfiTbl(rows){return `<div class="tbl-wrap"><table>
+  <thead><tr>${thSort('id','#')}${thSort('issue','Issue')}${thSort('description','Description')}${thSort('location','Location')}${thSort('poles','Poles')}${thSort('risk','Risk')}${thSort('responsible','Responsible')}${thSort('action','Action')}${thSort('status','Status')}<th>Response</th><th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td style="color:var(--muted);font-size:11px">${r.id}</td>
+    <td style="color:var(--blue);font-weight:700">${esc(r.issue)}</td>
+    <td style="max-width:180px">${esc(r.description)}</td>
+    <td style="color:var(--muted);font-size:11px;max-width:140px">${esc(r.location)}</td>
+    <td style="text-align:center;font-weight:700">${r.poles}</td>
+    <td>${bdg(r.risk,rc(r.risk),rbg(r.risk))}</td>
+    <td style="color:var(--muted)">${esc(r.responsible)}</td>
+    <td style="max-width:160px;color:var(--muted)">${esc(r.action)}</td>
+    <td>${bdg(r.status,sc(r.status),sbg(r.status))}</td>
+    <td style="color:var(--muted);font-size:11px">${esc(r.response)}</td>
+    ${actions('rfi',r.id)}</tr>`).join('')}</tbody></table></div>`;}
+
+function ncrTbl(rows){return `<div class="tbl-wrap"><table>
+  <thead><tr>${thSort('code','Code')}${thSort('zone','Zone')}${thSort('description','Non-Conformance')}${thSort('kp','KP')}${thSort('rootCause','Root Cause')}${thSort('responsible','Responsible')}${thSort('closing','Closing')}${thSort('status','Status')}<th>Reviewer</th><th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td style="color:var(--red);font-weight:700;font-size:11px">${r.code.split('-').slice(-1)[0]}</td>
+    <td style="font-weight:500">${esc(r.zone)}</td>
+    <td style="max-width:220px;color:var(--muted)">${esc(r.description)}</td>
+    <td style="white-space:nowrap;font-size:11px;color:var(--muted)">${esc(r.kp)}</td>
+    <td style="color:var(--muted)">${esc(r.rootCause)}</td>
+    <td style="color:var(--muted)">${esc(r.responsible)}</td>
+    <td style="color:var(--amber);font-weight:600;white-space:nowrap">${esc(r.closing)}</td>
+    <td>${bdg(r.status,sc(r.status),sbg(r.status))}</td>
+    <td style="color:var(--muted)">${esc(r.reviewer)}</td>
+    ${actions('ncr',r.id)}</tr>`).join('')}</tbody></table></div>`;}
+
+function snaTbl(rows){return `<div class="tbl-wrap"><table>
+  <thead><tr>${thSort('code','SNA Code')}${thSort('date','Date')}${thSort('activity','Activity')}${thSort('scope','Scope')}<th>ITP Ref</th><th>Mat</th><th>Prelim</th><th>Dwg</th><th>Method</th><th>Permits</th><th>ITP</th>${thSort('erStatus','ER Status')}<th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr>
+    <td style="color:var(--green);font-weight:700;font-size:11px">${r.code.split('-').slice(-1)[0]}</td>
+    <td style="white-space:nowrap;color:var(--muted)">${esc(r.date)}</td>
+    <td style="font-weight:600;max-width:170px">${esc(r.activity)}</td>
+    <td style="color:var(--muted);max-width:160px;font-size:11px">${esc(r.scope)}</td>
+    <td style="color:var(--muted);font-size:10px;white-space:nowrap">${esc(r.itp)}</td>
+    ${[r.mat,r.prelim,r.drawings,r.method,r.permits,r.itpCheck].map(v=>`<td style="text-align:center;color:var(--green);font-weight:700">${v}</td>`).join('')}
+    <td>${bdg(r.erStatus,sc(r.erStatus),sbg(r.erStatus))}</td>
+    ${actions('sna',r.id)}</tr>`).join('')}</tbody></table></div>`;}
+
+function qvnTbl(rows){return `<div class="tbl-wrap"><table>
+  <thead><tr>${thSort('code','QVN')}${thSort('date','Date')}${thSort('location','Location')}${thSort('subject','Subject')}<th>Description</th>${thSort('relatedTKW','TKW?')}${thSort('ncrStatus','NCR Status')}<th></th></tr></thead>
+  <tbody>${rows.map(r=>`<tr class="${r.relatedTKW?'tkw-row':''}">
+    <td style="font-weight:700;color:${r.relatedTKW?'var(--accent)':'var(--purple)'}">${esc(r.code)}</td>
+    <td style="white-space:nowrap;color:var(--muted)">${esc(r.date)}</td>
+    <td style="max-width:150px;font-size:11px;color:var(--muted)">${esc(r.location)}</td>
+    <td style="max-width:160px;font-weight:600">${esc(r.subject)}</td>
+    <td style="max-width:200px;font-size:11px;color:var(--muted);white-space:pre-line">${esc(r.description)}</td>
+    <td>${r.relatedTKW?bdg('⚠ YES – TKW','var(--accent)','var(--acc2)'):bdg('No','var(--muted)','#F0F3F7')}</td>
+    <td>${bdg(r.ncrStatus,sc(r.ncrStatus),sbg(r.ncrStatus))}</td>
+    ${actions('qvn',r.id)}</tr>`).join('')}</tbody></table></div>`;}
+
+
+
+
+// ── WIR helpers ────────────────────────────────────────────────
+function wirColor(s){
+  var l=(s||'').toUpperCase();
+  if(l==='APPROVED') return {c:'var(--green)',bg:'var(--greenbg)'};
+  if(l==='AWC')      return {c:'#0E7490',bg:'#E0F7FA'};
+  if(l==='REJECTED') return {c:'var(--red)',bg:'var(--redbg)'};
+  return {c:'var(--amber)',bg:'var(--amberbg)'};
+}
+
+function wirTbl(rows){
+  if(!rows||rows.length===0){
+    return '<div style="padding:48px;text-align:center;color:var(--muted);font-size:13px">No records match this filter.</div>';
+  }
+  var tot=0;
+  for(var i=0;i<rows.length;i++) tot+=rows[i].poleCount||0;
+
+  var th='<tr>';
+  var cols=[['id','#'],['code','WIR Reference'],['date','Date'],['type','Type'],
+            ['locFrom','From'],['locTo','To'],['desc','Description'],['poles','Poles Covered'],
+            ['poleCount','# Poles'],['checklist','✓'],['plannedDate','Planned'],
+            ['inspDate','Insp. Date'],['inspector','Inspector'],['status','Status'],
+            ['remarks','Remarks'],['_','']];
+  for(var c=0;c<cols.length;c++){
+    if(cols[c][0]==='_') th+='<th></th>';
+    else th+=thSort(cols[c][0],cols[c][1]);
+  }
+  th+='</tr>';
+
+  var tb='';
+  for(var j=0;j<rows.length;j++){
+    var r=rows[j];
+    var wc=wirColor(r.status);
+    tb+='<tr>';
+    tb+='<td style="color:var(--muted);font-size:11px">'+(r.id||'')+'</td>';
+    tb+='<td style="color:#0E7490;font-weight:700;font-size:11px;white-space:nowrap">'+esc(r.code||'')+'</td>';
+    tb+='<td style="white-space:nowrap;color:var(--muted)">'+esc(r.date||'')+'</td>';
+    tb+='<td><span class="bdg" style="background:#E0F7FA;color:#0E7490;border:1px solid #0E749033">'+esc(r.type||'')+'</span></td>';
+    tb+='<td style="font-size:11px;color:var(--muted);max-width:130px">'+esc(r.locFrom||'')+'</td>';
+    tb+='<td style="font-size:11px;color:var(--muted);max-width:130px">'+esc(r.locTo||'')+'</td>';
+    tb+='<td style="max-width:180px;color:var(--muted)">'+esc(r.desc||'')+'</td>';
+    tb+='<td style="max-width:150px;font-size:10px;color:var(--muted)">'+esc(r.poles||'')+'</td>';
+    tb+='<td style="text-align:center;font-weight:700;color:#0E7490">'+(r.poleCount||0)+'</td>';
+    tb+='<td style="text-align:center;color:var(--green);font-weight:700">'+esc(r.checklist||'✓')+'</td>';
+    tb+='<td style="color:var(--muted);font-size:11px">'+(r.plannedDate||'—')+'</td>';
+    tb+='<td style="color:var(--muted);font-size:11px">'+(r.inspDate||'—')+'</td>';
+    tb+='<td style="color:var(--muted)">'+(r.inspector||'—')+'</td>';
+    tb+='<td><span class="bdg" style="background:'+wc.bg+';color:'+wc.c+';border:1px solid '+wc.c+'33">'+(r.status||'PENDING')+'</span></td>';
+    tb+='<td style="color:var(--muted);font-size:11px">'+esc(r.remarks||'')+'</td>';
+    tb+='<td>'
+      +'<button class="btn-edit" data-t="wir" data-id="'+r.id+'">✏ Edit</button> '
+      +'<button class="btn-del"  data-t="wir" data-id="'+r.id+'">🗑</button>'
+      +'</td>';
+    tb+='</tr>';
+  }
+  tb+='<tr style="background:var(--s2)">'
+    +'<td colspan="8" style="text-align:right;font-weight:700;color:var(--muted);font-size:11px;padding:10px 14px">TOTAL POLES</td>'
+    +'<td style="text-align:center;color:#0E7490;font-size:16px;font-weight:900;padding:10px 14px">'+tot+'</td>'
+    +'<td colspan="7"></td></tr>';
+
+  return '<div class="tbl-wrap"><table><thead>'+th+'</thead><tbody>'+tb+'</tbody></table></div>';
+}
+
+// ═══════════════════════ DASHBOARD ════════════════════════════
+function dashHTML(){
+  const rOpen=DATA.rfi.filter(r=>r.status==='Open').length;
+  const rPend=DATA.rfi.filter(r=>r.status==='Pending').length;
+  const rClosed=DATA.rfi.filter(r=>r.status==='Closed').length;
+  const nOpen=DATA.ncr.filter(r=>r.status==='Open').length;
+  const nClosed=DATA.ncr.filter(r=>r.status==='Closed').length;
+  const sPend=DATA.sna.filter(r=>r.erStatus==='Pending ER'||r.erStatus==='Pending').length;
+  const sApproved=DATA.sna.filter(r=>r.erStatus==='Approved').length;
+  const sRejected=DATA.sna.filter(r=>r.erStatus==='Rejected').length;
+  const qOpen=DATA.qvn.filter(r=>r.ncrStatus.includes('Open')).length;
+  const total=DATA.rfi.length+DATA.ncr.length+DATA.qvn.length;
+
+  const kpi=(lbl,val,sub,c,pct)=>`<div class="kpi" style="--c:${c}">
+    <div class="kpi-lbl">${lbl}</div>
+    <div class="kpi-val">${val}</div>
+    <div class="kpi-sub">${sub}</div>
+    ${pct!==undefined?`<div class="kpi-bar"><div class="kpi-bar-fill" style="width:${pct}%;background:${c}"></div></div>`:''}
+  </div>`;
+
+  const sum=(reg,code,total,open,pend,color)=>`<div class="sum-row">
+    <span class="reg-pill" style="background:${color}15;color:${color};border:1px solid ${color}25">${reg}</span>
+    <span class="sum-code">${code}</span>
+    <div class="bdg-row">
+      ${bdg('Total: '+total,color)}
+      ${open>0?bdg('Open: '+open,'var(--red)','var(--redbg)'):''}
+      ${pend>0?bdg('Pending: '+pend,'var(--amber)','var(--amberbg)'):''}
+    </div>
+  </div>`;
+
+  return `
+    <div class="kpi-grid">
+      ${kpi('RFI Open',rOpen,rPend+' Pending · '+rClosed+' Closed','var(--blue)',Math.round(rClosed/DATA.rfi.length*100||0))}
+      ${kpi('NCR Open',nOpen,nClosed+' Closed · '+DATA.ncr.length+' Total','var(--red)',Math.round(nClosed/DATA.ncr.length*100||0))}
+      ${kpi('SNA Pending ER',sPend,sApproved+' Approved · '+(sRejected>0?sRejected+' Rejected · ':'')+DATA.sna.length+' Total','var(--red)',Math.round(sApproved/DATA.sna.length*100||0))}
+      ${kpi('QVN – TKW Action',DATA.qvn.filter(r=>r.relatedTKW).length,qOpen+' Open','var(--purple)',0)}
+      ${kpi('Total Issues',total,'Across RFI · NCR · QVN','var(--accent)')}
+      ${kpi('WIR Pending',DATA.wir.filter(r=>r.status==='PENDING').length,DATA.wir.length+' Total · 201 Poles','#0E7490')}
+    </div>
+
+    <div class="alert">
+      <div class="alert-title">⚠ ACTION REQUIRED – QVN-01 (TrackWay)</div>
+      <div class="alert-body">QVN-01 is directly related to TKW (TrackWay). Incorrect cantilever at KP 1+208.27.
+        NCR must be raised per <strong>ISO 9001:2015 Cl 8.7 &amp; 10.2</strong>, and correction + preventive action proposals submitted to the ER before QVN can be closed.</div>
+    </div>
+
+    <div class="charts-grid">
+      <div class="chart-card"><div class="chart-title">RFI Status</div><div class="chart-wrap"><canvas id="ch-rfi"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">NCR Status</div><div class="chart-wrap"><canvas id="ch-ncr"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">SNA ER Approval</div><div class="chart-wrap"><canvas id="ch-sna"></canvas></div></div>
+      <div class="chart-card"><div class="chart-title">WIR Status (16 WIRs)</div><div class="chart-wrap"><canvas id="ch-wir"></canvas></div></div>
+    </div>
+
+    <div class="sum-block">
+      <div class="sum-lbl">Register Summary</div>
+      ${sum('RFI','HSR-TKW-RFI-CJV-GL-000001',DATA.rfi.length,rOpen,rPend,'var(--blue)')}
+      ${sum('NCR','NCS-GEN-RELOCS-CJV-TRK-00001~00006',DATA.ncr.length,nOpen,0,'var(--red)')}
+      ${sum('SNA','SNA-DP01-RELOCS-TKW-00003~00008',DATA.sna.length,0,sPend,'var(--green)')}
+      ${sum('QVN','QVN-OCS-01',DATA.qvn.length,qOpen,0,'var(--purple)')}
+    </div>`;
+}
+
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};}
+
+function initCharts(){
+  const donut=(id,labels,data,colors)=>{
+    const el=document.getElementById(id);if(!el)return;
+    charts[id]=new Chart(el,{type:'doughnut',data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{cutout:'68%',plugins:{legend:{position:'right',labels:{font:{size:11},padding:12,boxWidth:12}}},animation:{animateRotate:true,duration:700}}});
+  };
+  const bar=(id,labels,data,colors)=>{
+    const el=document.getElementById(id);if(!el)return;
+    charts[id]=new Chart(el,{type:'bar',data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6,borderSkipped:false}]},options:{plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{font:{size:11}}},y:{grid:{color:'#f0f0f0'},ticks:{stepSize:1,font:{size:11}}}},animation:{duration:700}}});
+  };
+  const rOpen=DATA.rfi.filter(r=>r.status==='Open').length;
+  const rPend=DATA.rfi.filter(r=>r.status==='Pending').length;
+  const rClosed=DATA.rfi.filter(r=>r.status==='Closed').length;
+  const nOpen=DATA.ncr.filter(r=>r.status==='Open').length;
+  const nClosed=DATA.ncr.filter(r=>r.status==='Closed').length;
+  const sPend=DATA.sna.filter(r=>r.erStatus==='Pending ER'||r.erStatus==='Pending').length;
+  const sApp=DATA.sna.filter(r=>r.erStatus==='Approved').length;
+  const sRej=DATA.sna.filter(r=>r.erStatus==='Rejected').length;
+  const high=DATA.rfi.filter(r=>r.risk==='HIGH').length;
+  const med=DATA.rfi.filter(r=>r.risk==='MEDIUM').length;
+  const low=DATA.rfi.filter(r=>r.risk==='LOW').length;
+
+  donut('ch-rfi',['Open','Pending','Closed'],[rOpen,rPend,rClosed],['#D63A2F','#C97D10','#1A8A4A']);
+  donut('ch-ncr',['Open','Closed'],[nOpen,nClosed],['#D63A2F','#1A8A4A']);
+  donut('ch-sna',['Pending ER','Approved','Rejected'],[sPend,sApp,sRej],['#D63A2F','#1A8A4A','#C97D10']);
+  var wp=DATA.wir.filter(r=>r.status==='PENDING').length,wa=DATA.wir.filter(r=>r.status==='APPROVED').length,wc2=DATA.wir.filter(r=>r.status==='AWC').length,wr=DATA.wir.filter(r=>r.status==='REJECTED').length;
+  donut('ch-wir',['Pending','Approved','AWC','Rejected'],[wp,wa,wc2,wr],['#C97D10','#1A8A4A','#0E7490','#D63A2F']);
+  bar('ch-risk',['HIGH','MEDIUM','LOW'],[high,med,low],['#FEF2F1','#FFF8ED','#EDFAF3'].map((bg,i)=>['#D63A2F','#C97D10','#1A8A4A'][i]));
+}
+
+// ═══════════════════════ EXPORT ═══════════════════════════════
+function exportXLSX(){
+  const rows=filtered(DATA[tab]);
+  if(!rows.length){showToast('⚠ No records to export');return;}
+  const ws=XLSX.utils.json_to_sheet(rows.map(r=>{const o={};Object.entries(r).forEach(([k,v])=>{o[k.toUpperCase()]=v});return o;}));
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,tab.toUpperCase());
+  XLSX.writeFile(wb,`HSR_QMS_${tab.toUpperCase()}_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('📥 Excel file downloaded');
+}
+
+// ═══════════════════════ MODAL ════════════════════════════════
+const FIELDS={
+  rfi:[{k:'issue',l:'Issue #',t:'text'},{k:'description',l:'Description',t:'ta'},{k:'location',l:'Location',t:'ta'},{k:'poles',l:'No. of Poles',t:'text'},{k:'risk',l:'Risk Level',t:'sel',o:['HIGH','MEDIUM','LOW']},{k:'responsible',l:'Responsible Party',t:'text'},{k:'action',l:'Action Required',t:'ta'},{k:'status',l:'Status',t:'sel',o:['Open','Pending','Closed']},{k:'response',l:'Response / Decision',t:'ta'},{k:'remarks',l:'Remarks',t:'text'}],
+  ncr:[{k:'zone',l:'Zone / Sector',t:'text'},{k:'description',l:'Non-Conformance',t:'ta'},{k:'kp',l:'KP Range',t:'text'},{k:'rootCause',l:'Root Cause',t:'text'},{k:'responsible',l:'Responsible',t:'text'},{k:'action',l:'Proposed Action',t:'text'},{k:'correction',l:'NCR Correction',t:'ta'},{k:'corrective',l:'Corrective Action',t:'ta'},{k:'closing',l:'Proposed Closing Date',t:'text'},{k:'status',l:'Status',t:'sel',o:['Open','Closed']},{k:'reviewer',l:'Reviewer',t:'text'},{k:'closedBy',l:'Closed By',t:'text'}],
+  sna:[{k:'activity',l:'Activity Description',t:'text'},{k:'scope',l:'Scope of Work',t:'ta'},{k:'erStatus',l:'ER Approval Status',t:'sel',o:['Pending ER','Approved','Rejected']},{k:'comments',l:'Comments',t:'ta'}],
+  wir:[
+    {k:'code',l:'WIR Reference',t:'text'},
+    {k:'date',l:'Date Issued',t:'text'},
+    {k:'type',l:'Type',t:'text'},
+    {k:'locFrom',l:'Location From',t:'text'},
+    {k:'locTo',l:'Location To',t:'text'},
+    {k:'desc',l:'Inspection Description',t:'ta'},
+    {k:'poleCount',l:'No. of Poles',t:'text'},
+    {k:'plannedDate',l:'Planned Date',t:'text'},
+    {k:'inspDate',l:'Actual Insp. Date',t:'text'},
+    {k:'inspector',l:'Inspector',t:'text'},
+    {k:'status',l:'Status',t:'sel',o:['PENDING','APPROVED','AWC','REJECTED']},
+    {k:'remarks',l:'Remarks',t:'ta'},
+  ],
+  qvn:[{k:'location',l:'Location',t:'text'},{k:'subject',l:'Subject',t:'text'},{k:'description',l:'Description',t:'ta'},{k:'ncrStatus',l:'NCR Status',t:'sel',o:['NCR Required – Open','NCR Raised – Pending ER','Closed']},{k:'contractorRef',l:'Contractor Reference',t:'text'},{k:'closedBy',l:'Closed By',t:'text'}],
+};
+
+function openEdit(type,id){
+  const item=DATA[type]?DATA[type].find(r=>r.id===id||r.id===String(id)):null;
+  if(!item){console.error('openEdit: item not found',type,id,DATA[type]);return;}
+  editItem={...item};editType=type;
+  document.getElementById('m-title').textContent='✏ Edit: '+(item.code||item.issue||item.activity||'Record '+id);
+  buildForm();document.getElementById('modal').style.display='flex';
+}
+function openAdd(){
+  const type=tab;const last=DATA[type].slice(-1)[0];const newId=(last?.id||0)+1;
+  let code='';
+  if(type==='rfi')code='HSR-TKW-RFI-CJV-GL-'+String(newId).padStart(6,'0');
+  if(type==='ncr')code='NCS-GEN-RELOCS-CJV-TRK-'+String(newId).padStart(5,'0');
+  if(type==='sna')code='SNA-DP01-RELOCS-TKW-'+String(newId+2).padStart(5,'0');
+  if(type==='qvn')code='QVN-'+String(newId).padStart(2,'0');
+  const tmpl={
+    rfi:{id:newId,code,rev:'A',date:'',issue:'Issue '+newId,description:'',location:'',poles:0,risk:'HIGH',responsible:'',action:'',status:'Open',response:'',remarks:''},
+    ncr:{id:newId,code,cat:'14.2',date:'',zone:'',description:'',kp:'',rootCause:'Methods',responsible:'Supplier (TrackWay)',action:'Rework as required',correction:'',corrective:'',closing:'',status:'Open',reviewer:'',closedBy:''},
+    sna:{id:newId,code,rev:'A',date:'',location:'October Garden Depot',activity:'',scope:'',itp:'HSR-SOA-TPR-RELOCS-GL-1400001',mat:'✔',prelim:'✔',drawings:'✔',method:'✔',permits:'✔',equip:'✔',itpCheck:'✔',erStatus:'Pending ER',comments:''},
+    qvn:{id:newId,code,sor:String(newId),date:'',originator:'',designation:'',contractor:'SOAC-CJV',location:'',subject:'',description:'',refOther:true,relatedTKW:false,ncrStatus:'NCR Required – Open',contractorRef:'',closedBy:''},
+    wir:{id:newId,code,rev:'A',date:'',type:'Brackets',locFrom:'',locTo:'',desc:'',poles:'',poleCount:0,checklist:'✓',plannedDate:'',inspDate:'',inspector:'',status:'PENDING',remarks:''},
+  };
+  editItem=tmpl[type];editType=type;
+  document.getElementById('m-title').textContent='＋ New '+type.toUpperCase()+' Record';
+  buildForm();document.getElementById('modal').style.display='flex';
+}
+function buildForm(){
+  document.getElementById('m-form').innerHTML=FIELDS[editType].map(f=>{
+    const v=editItem[f.k]!==undefined?editItem[f.k]:'';
+    if(f.t==='sel')return`<div><label class="fl">${f.l}</label><select class="fs" onchange="editItem['${f.k}']=this.value">${f.o.map(o=>`<option ${o===v?'selected':''}>${o}</option>`).join('')}</select></div>`;
+    if(f.t==='ta')return`<div><label class="fl">${f.l}</label><textarea class="ft" oninput="editItem['${f.k}']=this.value">${esc(v)}</textarea></div>`;
+    return`<div><label class="fl">${f.l}</label><input class="fi" value="${esc(String(v))}" oninput="editItem['${f.k}']=this.value"/></div>`;
+  }).join('');
+}
+function saveModal(){
+  const arr=DATA[editType];const idx=arr.findIndex(r=>r.id===editItem.id);
+  if(idx>=0)arr[idx]={...arr[idx],...editItem};else arr.push(editItem);
+  saveData();closeModal();render();
+}
+function closeModal(){document.getElementById('modal').style.display='none';editItem=null;editType=null;}
+
+// ═══════════════════════ DELETE ═══════════════════════════════
+function openDel(type,id){
+  const item=DATA[type].find(r=>r.id===id);
+  deleteItem=id;deleteType=type;
+  document.getElementById('confirm-body').innerHTML=`Delete <strong>${item.code||item.issue||item.activity}</strong>? This cannot be undone.`;
+  document.getElementById('confirm').style.display='flex';
+}
+function execDelete(){
+  DATA[deleteType]=DATA[deleteType].filter(r=>r.id!==deleteItem);
+  saveData();closeConfirm();render();showToast('🗑 Record deleted');
+}
+function closeConfirm(){document.getElementById('confirm').style.display='none';deleteItem=null;deleteType=null;}
+
+// ═══════════════════════ INIT ═════════════════════════════════
+renderNav();render();
+// ══════════════════════════════════════════════════════════════
+// MONTHLY REPORT
+// ══════════════════════════════════════════════════════════════
+
+function openMonthlyReport(){
+  // Copy logo src to report logo
+  var mainLogo=document.querySelector('.tkw-logo img');
+  if(mainLogo) document.getElementById('rpt-logo').src=mainLogo.src;
+  buildReport();
+  document.getElementById('rpt-modal').style.display='flex';
+}
+function closeReport(){
+  document.getElementById('rpt-modal').style.display='none';
+}
+
+function getMonthName(m){
+  return ['','January','February','March','April','May','June',
+          'July','August','September','October','November','December'][parseInt(m)];
+}
+
+function buildReport(){
+  var month=document.getElementById('rpt-month').value;
+  var year=document.getElementById('rpt-year').value;
+  var prepBy=document.getElementById('rpt-preparedby').value;
+  var mName=getMonthName(month);
+  document.getElementById('rpt-subtitle').textContent=mName+' '+year+' – Prepared by '+prepBy;
+
+  // ── Counters ──
+  var rfiOpen    = DATA.rfi.filter(r=>r.status==='Open').length;
+  var rfiPend    = DATA.rfi.filter(r=>r.status==='Pending').length;
+  var rfiClosed  = DATA.rfi.filter(r=>r.status==='Closed').length;
+  var ncrOpen    = DATA.ncr.filter(r=>r.status==='Open').length;
+  var ncrClosed  = DATA.ncr.filter(r=>r.status==='Closed').length;
+  var snaTotal   = DATA.sna.length;
+  var snaPend    = DATA.sna.filter(r=>r.erStatus==='Pending ER'||r.erStatus==='Pending').length;
+  var snaApproved= DATA.sna.filter(r=>r.erStatus==='Approved').length;
+  var wirTotal   = DATA.wir.length;
+  var wirPend    = DATA.wir.filter(r=>r.status==='PENDING').length;
+  var wirApproved= DATA.wir.filter(r=>r.status==='APPROVED').length;
+  var wirAwc     = DATA.wir.filter(r=>r.status==='AWC').length;
+  var wirRej     = DATA.wir.filter(r=>r.status==='REJECTED').length;
+  var wirPoles   = DATA.wir.reduce(function(s,r){return s+(r.poleCount||0);},0);
+  var qvnOpen    = DATA.qvn.filter(r=>(r.ncrStatus||'').includes('Open')).length;
+
+  function kpi(val,lbl,c){
+    return '<div class="rpt-kpi" style="--c:'+c+'"><div class="rpt-kpi-val">'+val+'</div><div class="rpt-kpi-lbl">'+lbl+'</div></div>';
+  }
+
+  function statusBadge(s){
+    var cl='background:#FEF2F1;color:#D63A2F;border:1px solid #D63A2F33';
+    var sl=(s||'').toLowerCase();
+    if(sl.includes('approved')||sl.includes('closed')) cl='background:#EDFAF3;color:#1A8A4A;border:1px solid #1A8A4A33';
+    else if(sl.includes('pending')) cl='background:#FFF8ED;color:#C97D10;border:1px solid #C97D1033';
+    return '<span style="display:inline-block;border-radius:4px;padding:2px 8px;font-size:10px;font-weight:700;'+cl+'">'+s+'</span>';
+  }
+
+  function rfiRows(){
+    return DATA.rfi.map(function(r){
+      return '<tr><td>'+esc(r.issue||'')+'</td>'
+        +'<td>'+esc(r.description||'')+'</td>'
+        +'<td>'+esc(r.responsible||'')+'</td>'
+        +'<td>'+statusBadge(r.status)+'</td></tr>';
+    }).join('');
+  }
+
+  function ncrRows(){
+    return DATA.ncr.map(function(r){
+      return '<tr><td style="font-size:11px">'+esc(r.code.split('-').slice(-1)[0])+'</td>'
+        +'<td>'+esc(r.zone||'')+'</td>'
+        +'<td style="max-width:220px">'+esc(r.description||'')+'</td>'
+        +'<td>'+esc(r.closing||'')+'</td>'
+        +'<td>'+statusBadge(r.status)+'</td></tr>';
+    }).join('');
+  }
+
+  function snaRows(){
+    return DATA.sna.map(function(r){
+      return '<tr><td style="font-size:11px">'+esc(r.code.split('-').slice(-1)[0])+'</td>'
+        +'<td>'+esc(r.activity||'')+'</td>'
+        +'<td>'+esc(r.date||'')+'</td>'
+        +'<td>'+statusBadge(r.erStatus)+'</td></tr>';
+    }).join('');
+  }
+
+  function wirRows(){
+    return DATA.wir.map(function(r){
+      return '<tr><td style="font-size:11px;color:#0E7490;font-weight:700">'+esc(r.code)+'</td>'
+        +'<td>'+esc(r.type||'')+'</td>'
+        +'<td>'+esc(r.locFrom||'')+'</td>'
+        +'<td style="text-align:center;font-weight:700">'+r.poleCount+'</td>'
+        +'<td>'+esc(r.plannedDate||'—')+'</td>'
+        +'<td>'+esc(r.inspDate||'—')+'</td>'
+        +'<td>'+statusBadge(r.status)+'</td></tr>';
+    }).join('');
+  }
+
+  function qvnRows(){
+    return DATA.qvn.map(function(r){
+      var tkwStyle=r.relatedTKW?'background:#FFF8EC;border-left:3px solid #C87D0E':'';
+      return '<tr style="'+tkwStyle+'">'
+        +'<td style="font-weight:700;color:'+(r.relatedTKW?'var(--accent)':'var(--purple)')+'">'+esc(r.code)+'</td>'
+        +'<td>'+esc(r.subject||'')+'</td>'
+        +'<td>'+(r.relatedTKW?'<span style="background:#FFF8EC;color:#C87D0E;border:1px solid #C87D0E33;border-radius:4px;padding:2px 7px;font-size:10px;font-weight:700">⚠ TKW</span>':'<span style="color:var(--muted);font-size:11px">SOAC-CJV</span>')+'</td>'
+        +'<td>'+statusBadge(r.ncrStatus)+'</td></tr>';
+    }).join('');
+  }
+
+  var html2=
+    // ── Executive Summary ──────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#1A2332,#2E3D52)">📋 Executive Summary</div>'+
+    '<div class="rpt-kpi-row">'+
+      kpi(DATA.rfi.length,'Total RFIs','var(--blue)')+
+      kpi(rfiOpen,'Open RFIs','var(--red)')+
+      kpi(DATA.ncr.length,'Total NCRs','var(--red)')+
+      kpi(ncrOpen,'Open NCRs','var(--red)')+
+      kpi(snaTotal,'Total SNAs','var(--green)')+
+      kpi(snaPend,'Pending ER','var(--amber)')+
+      kpi(wirTotal,'Total WIRs','#0E7490')+
+      kpi(wirPoles,'Poles Covered','#0E7490')+
+      kpi(qvnOpen,'Open QVNs','var(--purple)')+
+    '</div>'+
+    '<div style="background:#FFF8EC;border:1px solid #F5C96B;border-left:4px solid var(--accent);border-radius:8px;padding:12px 16px;font-size:12px;">'+
+    '<strong style="color:var(--accent)">⚠ Action Required:</strong> '+
+    'QVN-01 is directly related to TrackWay. NCR must be raised per ISO 9001:2015 Cl 8.7 & 10.2 and submitted to ER before QVN can be closed.'+
+    '</div>'+
+    '</div>'+
+
+    // ── RFI Section ─────────────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#1D6FA4,#2980B9)">📋 RFI Register – '+DATA.rfi.length+' Issues</div>'+
+    '<table class="rpt-table">'+
+    '<thead><tr><th>Issue</th><th>Description</th><th>Responsible</th><th>Status</th></tr></thead>'+
+    '<tbody>'+rfiRows()+'</tbody></table></div>'+
+
+    // ── NCR Section ─────────────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#C0392B,#E74C3C)">⚠ NCR Register – '+DATA.ncr.length+' Records ('+ncrOpen+' Open)</div>'+
+    '<table class="rpt-table">'+
+    '<thead><tr><th>Code</th><th>Zone</th><th>Non-Conformance</th><th>Closing Date</th><th>Status</th></tr></thead>'+
+    '<tbody>'+ncrRows()+'</tbody></table></div>'+
+
+    // ── SNA Section ─────────────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#1A6B32,#27AE60)">🚦 SNA Register – '+snaTotal+' Activities ('+snaPend+' Pending ER)</div>'+
+    '<table class="rpt-table">'+
+    '<thead><tr><th>Code</th><th>Activity</th><th>Date</th><th>ER Status</th></tr></thead>'+
+    '<tbody>'+snaRows()+'</tbody></table></div>'+
+
+    // ── WIR Section ─────────────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#0E7490,#0891B2)">🔍 WIR Register – '+wirTotal+' WIRs · '+wirPoles+' Poles</div>'+
+    '<table class="rpt-table">'+
+    '<thead><tr><th>WIR Code</th><th>Type</th><th>Location From</th><th># Poles</th><th>Planned Date</th><th>Insp. Date</th><th>Status</th></tr></thead>'+
+    '<tbody>'+wirRows()+'</tbody></table></div>'+
+
+    // ── QVN Section ─────────────────────────────────────────────
+    '<div class="rpt-section">'+
+    '<div class="rpt-section-title" style="background:linear-gradient(135deg,#6425A0,#7C3CC4)">🔔 QVN Register – '+DATA.qvn.length+' Notice(s)</div>'+
+    '<table class="rpt-table">'+
+    '<thead><tr><th>QVN</th><th>Subject</th><th>Responsibility</th><th>Status</th></tr></thead>'+
+    '<tbody>'+qvnRows()+'</tbody></table></div>'+
+
+    // ── Signature block ─────────────────────────────────────────
+    '<div style="margin-top:24px;padding-top:18px;border-top:2px solid var(--border)">'
+    +'<div style="border:1px solid var(--border);border-radius:8px;padding:16px;max-width:260px">'
+    +'<div style="font-size:10px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:28px">Prepared By</div>'
+    +'<div style="border-top:1px solid #333;padding-top:6px;font-size:12px;font-weight:600">'+prepBy+'</div>'
+    +'<div style="font-size:10px;color:var(--muted)">Quality Manager – TrackWay</div>'
+    +'</div></div>'
+
+  document.getElementById('rpt-body').innerHTML=html2;
+}
+
+function exportReportWord(){
+  var month=document.getElementById('rpt-month').value;
+  var year=document.getElementById('rpt-year').value;
+  var mName=getMonthName(month);
+  var prepBy=document.getElementById('rpt-preparedby').value;
+
+  // ── Build complete HTML document styled for Word ─────────────
+  var rfiOpen=DATA.rfi.filter(r=>r.status==='Open').length;
+  var rfiPend=DATA.rfi.filter(r=>r.status==='Pending').length;
+  var ncrOpen=DATA.ncr.filter(r=>r.status==='Open').length;
+  var snaPend=DATA.sna.filter(r=>r.erStatus==='Pending ER'||r.erStatus==='Pending').length;
+  var wirPend=DATA.wir.filter(r=>r.status==='PENDING').length;
+  var wirPoles=DATA.wir.reduce(function(s,r){return s+(r.poleCount||0);},0);
+  var qvnOpen=DATA.qvn.filter(r=>(r.ncrStatus||'').toLowerCase().includes('open')).length;
+
+  function stBadge(s,c,bg){
+    return '<span style="background:'+bg+';color:'+c+';border:1px solid '+c+'44;border-radius:3px;padding:2px 7px;font-size:10pt;font-weight:bold">'+s+'</span>';
+  }
+  function statusB(s){
+    var l=(s||'').toLowerCase();
+    if(l.includes('open')||l.includes('required')) return stBadge(s,'#C0392B','#FEF2F1');
+    if(l.includes('pending')) return stBadge(s,'#C97D10','#FFF8ED');
+    if(l.includes('closed')||l.includes('approved')) return stBadge(s,'#1A8A4A','#EDFAF3');
+    return stBadge(s,'#555','#f5f5f5');
+  }
+
+  var tblStyle='width:100%;border-collapse:collapse;margin-bottom:16pt;font-size:10pt;font-family:Calibri,sans-serif';
+  var thStyle='background:#1F3864;color:#fff;padding:7pt 10pt;text-align:left;font-size:9pt;letter-spacing:0.5pt;font-weight:bold';
+  var tdStyle='padding:5pt 7pt;border-bottom:1px solid #E2E8F0;vertical-align:top;font-size:9pt';
+  var tdAlt='padding:5pt 7pt;border-bottom:1px solid #E2E8F0;vertical-align:top;background:#FAFBFD;font-size:9pt';
+
+  function tableHead(){return arguments[0];}
+
+  // RFI rows
+  var rfiTbody='';
+  DATA.rfi.forEach(function(r,i){
+    var td=i%2===0?tdStyle:tdAlt;
+    rfiTbody+='<tr><td style="'+td+'">'+esc(r.issue)+'</td><td style="'+td+';max-width:220pt">'+esc(r.description)+'</td><td style="'+td+'">'+esc(r.responsible)+'</td><td style="'+td+'">'+statusB(r.status)+'</td></tr>';
+  });
+
+  // NCR rows
+  var ncrTbody='';
+  DATA.ncr.forEach(function(r,i){
+    var td=i%2===0?tdStyle:tdAlt;
+    ncrTbody+='<tr><td style="'+td+';font-size:9pt;color:#C0392B;font-weight:bold">'+esc(r.code.split('-').slice(-1)[0])+'</td><td style="'+td+'">'+esc(r.zone)+'</td><td style="'+td+';max-width:220pt">'+esc(r.description)+'</td><td style="'+td+'">'+esc(r.closing)+'</td><td style="'+td+'">'+statusB(r.status)+'</td></tr>';
+  });
+
+  // SNA rows
+  var snaTbody='';
+  DATA.sna.forEach(function(r,i){
+    var td=i%2===0?tdStyle:tdAlt;
+    snaTbody+='<tr><td style="'+td+';font-size:9pt;color:#1A8A4A;font-weight:bold">'+esc(r.code.split('-').slice(-1)[0])+'</td><td style="'+td+'">'+esc(r.activity)+'</td><td style="'+td+'">'+esc(r.date)+'</td><td style="'+td+'">'+statusB(r.erStatus)+'</td></tr>';
+  });
+
+  // WIR rows
+  var wirTbody='';
+  DATA.wir.forEach(function(r,i){
+    var td=i%2===0?tdStyle:tdAlt;
+    wirTbody+='<tr><td style="'+td+';font-size:9pt;color:#0E7490;font-weight:bold">'+esc(r.code)+'</td><td style="'+td+'">'+esc(r.type)+'</td><td style="'+td+'">'+esc(r.locFrom)+'</td><td style="'+td+';text-align:center;font-weight:bold">'+r.poleCount+'</td><td style="'+td+'">'+esc(r.plannedDate||'—')+'</td><td style="'+td+'">'+esc(r.inspDate||'—')+'</td><td style="'+td+'">'+statusB(r.status)+'</td></tr>';
+  });
+
+  // QVN rows
+  var qvnTbody='';
+  DATA.qvn.forEach(function(r,i){
+    var td=i%2===0?tdStyle:tdAlt;
+    var tkwCell=r.relatedTKW?stBadge('⚠ TKW','#C87D0E','#FFF8EC'):stBadge('SOAC-CJV','#555','#f5f5f5');
+    qvnTbody+='<tr style="'+(r.relatedTKW?'background:#FFFAF0':'')+'"><td style="'+td+';font-weight:bold;color:'+(r.relatedTKW?'#C87D0E':'#6425A0')+'">'+esc(r.code)+'</td><td style="'+td+'">'+esc(r.subject)+'</td><td style="'+td+'">'+tkwCell+'</td><td style="'+td+'">'+statusB(r.ncrStatus)+'</td></tr>';
+  });
+
+  // ── Word-safe helpers ────────────────────────────────────────
+  // Section heading: single-row table with solid bg (Word ignores CSS gradients)
+  function wH2(label,bg){
+    return '<table style="width:100%;border-collapse:collapse;margin:10pt 0 2pt;page-break-inside:avoid"><tr>'
+      +'<td style="background:'+bg+';color:#fff;font-size:11pt;font-weight:bold;padding:6pt 10pt;font-family:Calibri,sans-serif">'+label+'</td>'
+      +'</tr></table>';
+  }
+  // KPI: compact inline block using nested table (Word-safe, no flex/div)
+  function wKpiRow(items){
+    // items = [{val, lbl, color}, ...]
+    var cols=items.map(function(k){
+      return '<td style="padding:0 5pt 0 0;vertical-align:top;width:'+(Math.floor(100/items.length))+'%">'
+        +'<table style="width:100%;border-collapse:collapse;border-left:3pt solid '+k.color+';background:#F4F7FB"><tr>'
+        +'<td style="padding:5pt 8pt;vertical-align:middle">'
+        +'<div style="font-size:18pt;font-weight:900;color:'+k.color+';line-height:1;margin:0">'+k.val+'</div>'
+        +'<div style="font-size:7pt;font-weight:bold;color:#64748B;text-transform:uppercase;letter-spacing:0.3pt;margin-top:2pt">'+k.lbl+'</div>'
+        +'</td></tr></table>'
+        +'</td>';
+    }).join('');
+    return '<table style="width:100%;border-collapse:collapse;margin:8pt 0 6pt;page-break-inside:avoid"><tr>'+cols+'</tr></table>';
+  }
+
+  var wordDoc='<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" '
+    +'xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">'
+    +'<head><meta charset="UTF-8">'
+    +'<xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom>'
+    +'<w:DoNotOptimizeForBrowser/></w:WordDocument></xml>'
+    +'<style>'
+    +'@page Section1{size:21cm 29.7cm;margin:2cm 2cm 2cm 2cm;mso-header-margin:1cm;mso-footer-margin:1cm}'
+    +'div.Section1{page:Section1}'
+    +'body{font-family:Calibri,sans-serif;font-size:10pt;color:#1A2332;margin:0;padding:0}'
+    +'p{margin:2pt 0;font-size:10pt;line-height:1.3}'
+    +'table{border-collapse:collapse;font-family:Calibri,sans-serif}'
+    +'table.data{width:100%;margin-bottom:8pt;page-break-inside:auto}'
+    +'table.data thead{display:table-header-group}'
+    +'table.data th{background:#1F3864;color:#fff;padding:5pt 7pt;text-align:left;font-size:8.5pt;font-weight:bold}'
+    +'table.data td{padding:5pt 7pt;border-bottom:1px solid #E2E8F0;font-size:9pt;vertical-align:top}'
+    +'table.data tr:nth-child(even) td{background:#FAFBFD}'
+    +'</style></head><body><div class="Section1">'
+
+    // ── Cover block ──────────────────────────────────────────
+    +'<table style="width:100%;border-collapse:collapse;border-bottom:2.5pt solid #1F3864;margin-bottom:10pt"><tr>'
+    +'<td style="padding:0 0 8pt;vertical-align:bottom;width:50%">'
+    +(function(){var li=document.querySelector('.hdr-left img');return li?'<img src="'+li.src+'" style="height:40pt;width:auto;display:block;margin-bottom:4pt" alt="TrackWay"/>':'<div style="font-size:18pt;font-weight:900;color:#1F3864">TRACKWAY</div>'})()
+    +'</td>'
+    +'<td style="padding:0 0 8pt;text-align:right;vertical-align:bottom;width:50%">'
+    +'<div style="font-size:16pt;font-weight:900;color:#1F3864;line-height:1">Quality Monthly Report</div>'
+    +'<p style="color:#64748B;margin:3pt 0 0">Egypt High-Speed Rail – Green Line | Contract 108/Metro</p>'
+    +'<p style="color:#64748B;margin:1pt 0 0">OCS Installation | October Garden Depot</p>'
+    +'</td></tr></table>'
+
+    +'<table style="width:100%;border-collapse:collapse;background:#F4F7FB;margin-bottom:10pt"><tr>'
+    +'<td style="padding:5pt 8pt;font-size:9.5pt;width:33%"><strong>Report Period:</strong> '+mName+' '+year+'</td>'
+    +'<td style="padding:5pt 8pt;font-size:9.5pt;width:34%"><strong>Prepared By:</strong> '+prepBy+'</td>'
+    +'<td style="padding:5pt 8pt;font-size:9.5pt;width:33%"><strong>Date:</strong> '+new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})+'</td>'
+    +'</tr></table>'
+
+    // ── Executive Summary ────────────────────────────────────
+    +wH2('Executive Summary','#1A2332')
+    +wKpiRow([
+      {val:DATA.rfi.length, lbl:'Total RFIs',      color:'#1D6FA4'},
+      {val:rfiOpen,         lbl:'Open RFIs',       color:'#C0392B'},
+      {val:ncrOpen,         lbl:'NCRs Open',       color:'#C0392B'},
+      {val:snaPend,         lbl:'SNA Pending ER',  color:'#C97D10'},
+      {val:DATA.wir.length, lbl:'Total WIRs',      color:'#0E7490'},
+      {val:wirPoles,        lbl:'Poles Covered',   color:'#0E7490'},
+      {val:qvnOpen,         lbl:'Open QVNs',       color:'#6425A0'}
+    ])
+    +'<table style="width:100%;border-collapse:collapse;margin-bottom:10pt;page-break-inside:avoid"><tr>'
+    +'<td style="background:#FFFAEC;border-left:3pt solid #C87D0E;border:1pt solid #F5C96B;padding:7pt 10pt;font-size:9.5pt">'
+    +'<strong style="color:#C87D0E">Action Required – QVN-01 (TrackWay):</strong> NCR must be raised per ISO 9001:2015 Cl 8.7 &amp; 10.2 and correction + preventive action proposals submitted to the ER before QVN-01 can be closed.'
+    +'</td></tr></table>'
+
+    // ── RFI ─────────────────────────────────────────────────
+    +wH2('RFI Register – '+DATA.rfi.length+' Issues','#1D6FA4')
+    +'<table class="data"><thead><tr><th style="width:9%">Issue</th><th style="width:38%">Description</th><th style="width:33%">Responsible Party</th><th style="width:20%">Status</th></tr></thead><tbody>'+rfiTbody+'</tbody></table>'
+
+    // ── NCR ─────────────────────────────────────────────────
+    +wH2('NCR Register – '+DATA.ncr.length+' Records','#C0392B')
+    +'<table class="data"><thead><tr><th style="width:8%">Code</th><th style="width:15%">Zone</th><th style="width:45%">Non-Conformance</th><th style="width:15%">Closing Date</th><th style="width:17%">Status</th></tr></thead><tbody>'+ncrTbody+'</tbody></table>'
+
+    // ── SNA ─────────────────────────────────────────────────
+    +wH2('SNA Register – '+DATA.sna.length+' Activities','#1A6B32')
+    +'<table class="data"><thead><tr><th style="width:10%">Code</th><th style="width:55%">Activity</th><th style="width:15%">Date</th><th style="width:20%">ER Status</th></tr></thead><tbody>'+snaTbody+'</tbody></table>'
+
+    // ── WIR ─────────────────────────────────────────────────
+    +wH2('WIR Register – '+DATA.wir.length+' WIRs · '+wirPoles+' Poles','#0E7490')
+    +'<table class="data"><thead><tr><th style="width:22%">WIR Code</th><th style="width:10%">Type</th><th style="width:28%">Location From</th><th style="width:8%"># Poles</th><th style="width:12%">Planned</th><th style="width:12%">Insp. Date</th><th style="width:8%">Status</th></tr></thead><tbody>'+wirTbody+'</tbody></table>'
+
+    // ── QVN ─────────────────────────────────────────────────
+    +wH2('QVN Register – '+DATA.qvn.length+' Notice(s)','#6425A0')
+    +'<table class="data"><thead><tr><th style="width:10%">QVN</th><th style="width:45%">Subject</th><th style="width:20%">Responsibility</th><th style="width:25%">Status</th></tr></thead><tbody>'+qvnTbody+'</tbody></table>'
+
+    // ── Signature ────────────────────────────────────────────
+    +'<table style="width:100%;border-collapse:collapse;border-top:1.5pt solid #CBD5E1;margin-top:16pt;page-break-inside:avoid"><tr>'
+    +'<td style="padding:10pt 0 0;vertical-align:top;width:220pt">'
+    +'<div style="font-size:7.5pt;font-weight:bold;letter-spacing:1pt;color:#64748B;text-transform:uppercase;margin-bottom:20pt">Prepared By</div>'
+    +'<div style="border-top:1pt solid #333;padding-top:4pt;font-size:10.5pt;font-weight:bold">'+prepBy+'</div>'
+    +'<div style="font-size:8.5pt;color:#64748B">Quality Manager – TrackWay</div>'
+    +'</td><td style="padding:0"></td></tr></table>'
+
+    +'</div></body></html>';
+
+  // Download as .doc (HTML-based Word file)
+  var blob=new Blob([wordDoc],{type:'application/msword;charset=utf-8'});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement('a');
+  a.href=url;
+  a.download='QMS_Monthly_Report_'+mName+'_'+year+'.doc';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📄 Word report downloaded!');
+}
+
+function exportReportExcel(){
+  var month=document.getElementById('rpt-month').value;
+  var year=document.getElementById('rpt-year').value;
+  var mName=getMonthName(month);
+  var wb=XLSX.utils.book_new();
+
+  // Summary sheet
+  var sumData=[
+    ['QUALITY MONTHLY REPORT - '+mName.toUpperCase()+' '+year],
+    ['Project','Egypt High-Speed Rail - Green Line (Contract 108/Metro)'],
+    ['Contractor','TrackWay'],
+    ['Location','October Garden Depot'],
+    ['Prepared By',document.getElementById('rpt-preparedby').value],
+    ['Report Period',mName+' '+year],
+    [''],
+    ['REGISTER','TOTAL','OPEN','CLOSED/APPROVED','PENDING'],
+    ['RFI',DATA.rfi.length,DATA.rfi.filter(r=>r.status==='Open').length,DATA.rfi.filter(r=>r.status==='Closed').length,DATA.rfi.filter(r=>r.status==='Pending').length],
+    ['NCR',DATA.ncr.length,DATA.ncr.filter(r=>r.status==='Open').length,DATA.ncr.filter(r=>r.status==='Closed').length,0],
+    ['SNA',DATA.sna.length,0,DATA.sna.filter(r=>r.erStatus==='Approved').length,DATA.sna.filter(r=>r.erStatus==='Pending ER'||r.erStatus==='Pending').length],
+    ['WIR',DATA.wir.length,0,DATA.wir.filter(r=>r.status==='APPROVED').length,DATA.wir.filter(r=>r.status==='PENDING').length],
+    ['QVN',DATA.qvn.length,DATA.qvn.filter(r=>(r.ncrStatus||'open').toLowerCase().includes('open')).length,DATA.qvn.filter(r=>(r.ncrStatus||'open').toLowerCase().includes('closed')).length,0],
+  ];
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sumData),'Summary');
+
+  // RFI sheet
+  var rfiRows=[['No.','Code','Issue','Description','Location','Poles','Responsible','Action','Status','Response']];
+  DATA.rfi.forEach(r=>rfiRows.push([r.id,r.code,r.issue,r.description,r.location,r.poles,r.responsible,r.action,r.status,r.response]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rfiRows),'RFI');
+
+  // NCR sheet
+  var ncrRows=[['No.','Code','Date','Zone','Description','KP','Root Cause','Responsible','Action','Closing Date','Status']];
+  DATA.ncr.forEach(r=>ncrRows.push([r.id,r.code,r.date,r.zone,r.description,r.kp,r.rootCause,r.responsible,r.action,r.closing,r.status]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(ncrRows),'NCR');
+
+  // SNA sheet
+  var snaRows=[['No.','Code','Date','Activity','Scope','ER Status']];
+  DATA.sna.forEach(r=>snaRows.push([r.id,r.code,r.date,r.activity,r.scope,r.erStatus]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(snaRows),'SNA');
+
+  // WIR sheet
+  var wirRows=[['No.','Code','Date','Type','From','To','Description','Poles Covered','# Poles','Planned Date','Insp. Date','Inspector','Status','Remarks']];
+  DATA.wir.forEach(r=>wirRows.push([r.id,r.code,r.date,r.type,r.locFrom,r.locTo,r.desc,r.poles,r.poleCount,r.plannedDate,r.inspDate,r.inspector,r.status,r.remarks]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(wirRows),'WIR');
+
+  // QVN sheet
+  var qvnRows=[['No.','Code','Date','Location','Subject','Description','TKW Related','NCR Status']];
+  DATA.qvn.forEach(r=>qvnRows.push([r.id,r.code,r.date,r.location,r.subject,r.description,r.relatedTKW?'YES':'No',r.ncrStatus]));
+  XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(qvnRows),'QVN');
+
+  XLSX.writeFile(wb,'QMS_Monthly_Report_'+mName+'_'+year+'.xlsx');
+  showToast('📥 Monthly Report exported!');
+}
+</script>
+
+<!-- Monthly Report Modal -->
+<div class="rpt-overlay" id="rpt-modal" style="display:none" onclick="if(event.target===this)closeReport()">
+  <div class="rpt-modal" id="rpt-content">
+    <button class="rpt-close" onclick="closeReport()">✕</button>
+
+    <div class="rpt-header">
+      <div class="rpt-logo-area">
+        <img id="rpt-logo" style="height:40px;width:auto" alt="TrackWay"/>
+        <div class="rpt-project">
+          <strong>Egypt High-Speed Rail – Green Line</strong><br>
+          Contract 108/Metro · October Garden Depot<br>
+          OCS Installation – Trackway
+        </div>
+      </div>
+      <div class="rpt-title-area">
+        <h2>📊 Quality Monthly Report</h2>
+        <p id="rpt-subtitle">Quality Management System – OCS</p>
+      </div>
+    </div>
+
+    <div class="rpt-period">
+      <label>Report Month</label>
+      <select id="rpt-month">
+        <option value="01">January</option><option value="02">February</option>
+        <option value="03">March</option><option value="04">April</option>
+        <option value="05" selected>May</option><option value="06">June</option>
+        <option value="07">July</option><option value="08">August</option>
+        <option value="09">September</option><option value="10">October</option>
+        <option value="11">November</option><option value="12">December</option>
+      </select>
+      <label>Year</label>
+      <input id="rpt-year" type="number" value="2026" min="2024" max="2030" style="width:85px"/>
+      <label>Prepared By</label>
+      <input id="rpt-preparedby" type="text" value="Eng. Abdelazem Ahmed" style="width:200px"/>
+      <button onclick="buildReport()" style="background:var(--blue);border:none;border-radius:7px;color:#fff;padding:7px 16px;font-weight:700;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer">Generate ↻</button>
+    </div>
+
+    <div id="rpt-body"></div>
+
+    <div class="rpt-actions">
+      <button class="rpt-btn-cancel" onclick="closeReport()">Close</button>
+      <button class="rpt-btn-excel" onclick="exportReportExcel()">⬇ Export Excel</button>
+      <button class="rpt-btn-pdf" onclick="exportReportWord()">📄 Export Word</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
